@@ -1,6 +1,7 @@
 # Projet de musique : MusicBrainz + API
 
 Ce dépot contient mes sources pour mon projet de WIM.
+Le projet est disponible à cette adresse : http://dwarves.iut-fbleau.fr/~minguet/music/
 
 ### Description
 
