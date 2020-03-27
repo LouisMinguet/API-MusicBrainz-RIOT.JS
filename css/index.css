@@ -1,0 +1,54 @@
+* {
+	font-family: 'Raleway', sans-serif;	/* Police de caractère */
+	/* --bleu-doux-pour-elric: #d6fffd;	 Couleur de fond pour Elric <3 */
+	color: rgba(0,0,0,.75);				/* Couleur du texte */
+}
+
+/* SURLIGNAGE */
+::selection {
+	color: black;
+	background: #99C48A;
+}
+
+::-moz-selection {
+	color: black;
+	background: #99C48A;
+}
+/* ---------------- */
+
+html, body {
+	height: 100%;
+	margin: 0; 
+	padding-bottom: 0;
+	padding-right: 0;
+	padding-left: 0;
+	padding-top: 10px;
+}
+
+body {
+	display : table;
+	width: 100%;
+}
+
+header {
+	border-bottom: solid #c2c2c2 1px;
+}
+
+footer {
+	display : table-row;
+	padding-left: 0;
+	padding-right: 0;
+	background-color: #c2c2c2;
+	width: auto;
+	font-size: 10px;
+}
+
+.th-sort:hover { cursor: pointer; }
+
+#titre-tableau { border-bottom: solid #c2c2c2 1px; }
+
+/* PAGINATION */
+
+.pagination li:hover{
+    cursor: pointer;
+}

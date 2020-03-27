@@ -1,0 +1,326 @@
+<app-recherche>
+	<app-titre></app-titre>
+	<div id="case-autocompletion">
+		<div class="input-group">
+		  	<select class="custom-select" id="select-recherche" onchange="{(e) => _changeRechercheType(e)}">
+		    	<option selected value="search-nothing">Choisir...</option>
+		    	<option value="search-artist">Artiste / Groupe</option>
+		    	<option value="search-music">Musique</option>
+		    	<option value="search-album">Album</option>
+		  	</select>
+		</div>
+	</div>
+
+	<br>
+
+	<div class="input-group mb-3">
+	  	<input list="champs-autocompletion" value="" id="input-recherche" type="text" class="form-control" placeholder="Recherche" aria-label="Recherche" aria-describedby="button-addon2" oninput="{(e) => _changeSelect(e)}">
+	  	<datalist id="champs-autocompletion">
+	  		<option each={data in datalist} value={data}></option>
+	  	</datalist>
+	  	<div class="input-group-append">
+	    	<button class="btn btn-outline-secondary" type="button" id="button-addon2" value="boutonRechercher" onclick="{(e) => _onSearch(e)}">Rechercher</button>
+	  	</div>
+	</div>
+
+	<br>
+	
+	<h2 class="text-titre" id="titre-tableau">Résultats disponibles</h2>
+
+	<br>
+
+	<div class="container">
+		<div class="form-group">
+			<h6><strong>Nombre de résultats par page :</strong></h6>
+	 		<select class="custom-select" name="state" id="maxRows" onchange="{(e) => _changeNombreRecherche(e)}">
+				<option value="5">5</option>
+				<option value="10">10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+			</select>
+		<div>
+
+		<br>
+
+		<div>
+		  	<label for="choixPertinents"> <strong>Choix pertinents uniquement&nbsp;&nbsp;</strong></label>
+		  	<input type="checkbox" id="choixPertinents" name="choixPertinents">
+		  	<font size="-2">&nbsp;&nbsp;(Enlever les résultats incomplets)</font>
+		</div>
+
+		<h6><strong>Pour trier le tableau, cliquez sur le titre d'une colonne.</strong></h6>
+		<div id="page-affichage">
+			
+			<!-- Tableau des artistes -->
+
+			<table id="table-recherche-artist" class="table table-striped table-class" style="position:absolute; top:-999px; left:-9999px;">
+				<thead class="thead-dark">
+				  	<tr each = "{item in tab_entete_artiste}">
+				    	<th onclick="sortTable(0, 1)" class="th-sort th-sm">{item.titre_nom}</th>
+				    	<th onclick="sortTable(1, 1)" class="th-sort th-sm">{item.titre_desc}</th>
+				    	<th onclick="sortTable(2, 1)" class="th-sort th-sm">{item.titre_pays}</th>
+				    	<th onclick="sortTable(3, 1)" class="th-sort th-sm">{item.titre_naissance}</th>
+				    	<th onclick="sortTable(4, 1)" class="th-sort th-sm">{item.titre_mort}</th>
+				  	</tr>
+			  	</thead>
+			  	<tbody>
+			  		<tr each = "{item in tab_item_artiste}">
+			  			<td>{item.item_nom}</td>
+			  			<td>{item.item_desc}</td>
+			  			<td>{item.item_pays}</td>
+			  			<td>{item.item_naissance}</td>
+			  			<td>{item.item_mort}</td>
+			  		</tr>
+			  	</tbody>
+			</table>
+
+			<!-- tableau des musiques -->
+			
+			<table id="table-recherche-musique" class="table table-striped table-class" style="position:absolute; top:-999px; left:-9999px;"> 
+				<!-- style="visibility: collapse;" -->
+				<thead class="thead-dark">
+				  	<tr each = "{item in tab_entete_musique}">
+				    	<th onclick="sortTable(0, 2)" class="th-sort th-sm">{item.titre_nom}</th>
+				    	<th onclick="sortTable(1, 2)" class="th-sort th-sm">{item.titre_chanteur}</th>
+				    	<th onclick="sortTable(2, 2)" class="th-sort th-sm">{item.titre_album}</th>
+				    	<th onclick="sortTable(3, 2)" class="th-sort th-sm">{item.titre_date}</th>
+				  	</tr>
+			  	</thead>
+			  	<tbody>
+			  		<tr each = "{item in tab_item_musique}">
+			  			<td>{item.item_nom}</td>
+			  			<td>{item.item_chanteur}</td>
+			  			<td>{item.item_album}</td>
+			  			<td>{item.item_date}</td>
+			  		</tr>
+			  	</tbody>
+			</table>
+
+			<!-- Tableau des albums -->
+
+			<table id="table-recherche-album" class="table table-striped table-class" style="position:absolute; top:-999px; left:-9999px;"> 
+				<!-- style="visibility: collapse;" -->
+				<thead class="thead-dark">
+				  	<tr each = "{item in tab_entete_album}">
+				    	<th onclick="sortTable(0, 3)" class="th-sort th-sm">{item.titre_nom}</th>
+				    	<th onclick="sortTable(1, 3)" class="th-sort th-sm">{item.titre_chanteur}</th>
+				    	<th onclick="sortTable(2, 3)" class="th-sort th-sm">{item.titre_date}</th>
+				    	<th onclick="sortTable(3, 3)" class="th-sort th-sm">{item.titre_nb_morceaux}</th>
+				  	</tr>
+			  	</thead>
+			  	<tbody>
+			  		<tr each = "{item in tab_item_album}">
+			  			<td>{item.item_nom}</td>
+			  			<td>{item.item_chanteur}</td>
+			  			<td>{item.item_date}</td>
+			  			<td>{item.item_nb_morceaux}</td>
+			  		</tr>
+			  	</tbody>
+			</table>
+		</div>
+	</div>
+
+	<script>
+		export default {
+
+			input:null,
+			url:'artist',
+			datalist: [],
+			limit: 5,
+
+			/***********************************
+				NOMBRE DE RECHERCHES
+			***********************************/
+
+			_changeNombreRecherche(e) {
+				if(e.target.value == 5)
+					this.limit = 5;
+				else if(e.target.value == 10)
+					this.limit = 10;
+				else if(e.target.value == 20)
+					this.limit = 20;
+				else if(e.target.value == 50)
+					this.limit = 50;
+				else if(e.target.value == 100)
+					this.limit = 100;
+
+				this.update();
+			},
+
+			/***********************************
+				AFFICHAGE DES TABLEAUX
+			***********************************/
+
+			_changeRechercheType(e) {
+				var recherche = document.getElementById("select-recherche");
+				var opt = recherche.options[recherche.selectedIndex];
+
+				var tabArtiste = document.getElementById("table-recherche-artist");
+				var tabMusique = document.getElementById("table-recherche-musique");
+				var tabAlbum = document.getElementById("table-recherche-album");
+
+				if(opt.text == 'Artiste / Groupe') {
+					this.url = 'artist';
+					tabArtiste.style.position = "relative";
+					tabArtiste.style.top = "0"; 
+					tabArtiste.style.left = "0";
+					tabMusique.style.position ="absolute"; 
+					tabMusique.style.top = "-999px"; 
+					tabMusique.style.left = "-9999px";
+					tabAlbum.style.position ="absolute"; 
+					tabAlbum.style.top = "-999px"; 
+					tabAlbum.style.left = "-9999px";
+				} else if(opt.text == 'Musique') {
+					this.url = 'recording';
+					tabMusique.style.position = "relative";
+					tabMusique.style.top = "0"; 
+					tabMusique.style.left = "0";
+					tabArtiste.style.position ="absolute"; 
+					tabArtiste.style.top = "-999px"; 
+					tabArtiste.style.left = "-9999px";
+					tabAlbum.style.position ="absolute"; 
+					tabAlbum.style.top = "-999px"; 
+					tabAlbum.style.left = "-9999px";
+				} else if(opt.text == 'Album') {
+					this.url = 'release';
+					tabAlbum.style.position = "relative";
+					tabAlbum.style.top = "0"; 
+					tabAlbum.style.left = "0";
+					tabMusique.style.position ="absolute"; 
+					tabMusique.style.top = "-999px"; 
+					tabMusique.style.left = "-9999px";
+					tabArtiste.style.position ="absolute"; 
+					tabArtiste.style.top = "-999px"; 
+					tabArtiste.style.left = "-9999px";
+				}
+				this.update();
+			},
+
+			/***********************************
+					 AUTOCOMPLETION
+			***********************************/
+
+			_changeSelect(e) {
+				this.input = e.target.value;
+				this.datalist = [];
+
+				if(this.input.length > 0) {
+					this.sa.getInformations(this.url, this.input, 5, 0).then((reponse) => {
+						if(this.url == 'artist') {
+							for(var i = 0; i < 5; i++) {
+								this.datalist.push(reponse["artists"][i].name);
+								//console.log(reponse["artists"][i].name);
+							}
+						} else if(this.url == 'recording') {
+							for(var i = 0; i < 5; i++) {
+								this.datalist.push(reponse["recordings"][i].title);
+								//console.log(reponse["recordings"][i].title);
+							}
+						} else if(this.url == 'release') {
+							for(var i = 0; i < 5; i++) {
+								this.datalist.push(reponse["releases"][i].title);
+								//console.log(reponse["release-groups"][i].title);
+							}
+						}
+						this.update();
+					});
+				}
+			},
+
+			/***********************************
+				REMPLISSAGE DES TABLEAUX
+			***********************************/
+
+			tab_entete_artiste: [
+				{titre_nom: "Nom", titre_desc: "Description", titre_pays: "Pays", titre_naissance: "Naissance", titre_mort: "Décès"}
+			],
+
+			tab_entete_musique: [
+				{titre_nom: "Nom", titre_chanteur: "Chanteur", titre_album: "Album", titre_date: "Sortie"}
+			],
+
+			tab_entete_album: [
+				{titre_nom: "Nom", titre_chanteur: "Chanteur", titre_date: "Date", titre_nb_morceaux: "Pistes"}
+			],
+
+			tab_item_artiste: [],
+			tab_item_musique: [],
+			tab_item_album: [],
+
+			_onSearch(e) {
+				this.tab_item_artiste = [];
+				this.tab_item_musique = [];
+				this.tab_item_album = [];
+
+				var checkboxTest = document.getElementById("choixPertinents");
+
+				if(this.input.length > 0) {
+					this.sa.getInformations(this.url, this.input, this.limit, 0).then((reponse) => {
+						if(this.url == 'artist') {
+							for(var i = 0; i < this.limit; i++) {
+								var obj = 
+										{	
+											"item_nom":reponse["artists"][i].name, 
+											"item_desc":reponse["artists"][i].disambiguation, 
+											"item_pays":reponse["artists"][i].country,
+											"item_naissance":reponse["artists"][i]["life-span"].begin,
+											"item_mort":reponse["artists"][i]["life-span"].end,
+										}
+								if(!(
+									(reponse["artists"][i].disambiguation == null ||
+									reponse["artists"][i].country == null || 
+									reponse["artists"][i]["life-span"].begin == null) &&
+									checkboxTest.checked == true)
+								)
+									this.tab_item_artiste.push(obj);
+								else
+									console.log("on ne l'affiche pas");
+							}
+						} else if(this.url == 'recording') {
+							for(var i = 0; i < this.limit; i++) {
+								var obj = 
+										{	
+											"item_nom":reponse["recordings"][i].title, 
+											"item_chanteur":reponse["recordings"][i]["artist-credit"][0].name, 
+											"item_album":reponse["recordings"][i]["releases"][0].title,
+											"item_date":reponse["recordings"][i]["releases"][0].date,
+										}
+								if(!(
+									(reponse["recordings"][i]["artist-credit"][0].name == null ||
+									reponse["recordings"][i]["releases"][0].title == null || 
+									reponse["recordings"][i]["releases"][0].date == null) &&
+									checkboxTest.checked == true)
+								)
+									this.tab_item_musique.push(obj);
+								else
+									console.log("on ne l'affiche pas");
+							}
+						} else if(this.url == 'release') {
+							for(var i = 0; i < this.limit; i++) {
+								var obj = 
+										{	
+											"item_nom":reponse["releases"][i].title, 
+											"item_chanteur":reponse["releases"][i]["artist-credit"][0].name,
+											"item_date":reponse["releases"][i].date,
+											"item_nb_morceaux":reponse["releases"][i]['track-count'],
+										}
+								if(!(
+									(reponse["releases"][i]["artist-credit"][0].name == null ||
+									reponse["releases"][i].date == null || 
+									reponse["releases"][i]['track-count'] == null) &&
+									checkboxTest.checked == true)
+								)
+									this.tab_item_album.push(obj);
+								else
+									console.log("on ne l'affiche pas");
+							}
+						}
+						this.update();
+					});
+				}
+			},
+		}		
+	</script>
+
+</app-recherche>
